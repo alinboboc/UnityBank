@@ -4,10 +4,12 @@ import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import static org.example.app.UserSession.getLoggedUserEmail;
+
 public class MainPage extends SessionUser {
 
     public MainPage() throws SQLException {
-        System.out.println("Welcome back, " + getSQL_loginFirstName());
+        System.out.println("Welcome back, " + getLoggedUserEmail());
         mainPageNavigation();
     }
 

@@ -9,6 +9,16 @@ import java.util.Scanner;
 
 public class DatabaseCredentials extends DataValidators {
 
+    public String loggedUser;
+
+    public String getLoggedUser() {
+        return loggedUser;
+    }
+
+    public void setLoggedUser(String loggedUser) {
+        this.loggedUser = loggedUser;
+    }
+
     public final Scanner scanner = new Scanner(System.in);
 
     public Connection getDatabaseConnectionDetails() throws SQLException {

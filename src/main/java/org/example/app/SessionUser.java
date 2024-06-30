@@ -9,6 +9,21 @@ public class SessionUser{
     private String SQL_registerLastName;
     private String SQL_registerBirthYear;
     private String SQL_registerNetIncome;
+    private String SQL_IBAN;
+    private String SQL_cardNumber;
+    private String SQL_accountBalance;
+    private String SQL_debtBalance;
+    private String SQL_PIN;
+    private static String SQL_loginEmail;
+    private static String SQL_loginUsername;
+    private static String SQL_loginFirstName;
+    private static String SQL_loginLastName;
+    private static String SQL_loginBirthYear;
+    private static String SQL_loginNetIncome;
+    private static String SQL_loginIBAN;
+    private static String SQL_loginCardNumber;
+    private static String SQL_loginAccountBalance;
+    private static String SQL_loginDebtBalance;
 
     public String getSQL_registerEmail() {
         return SQL_registerEmail;
@@ -66,11 +81,7 @@ public class SessionUser{
         this.SQL_registerNetIncome = SQL_registerNetIncome;
     }
 
-    private String SQL_IBAN;
-    private String SQL_cardNumber;
-    private String SQL_accountBalance;
-    private String SQL_debtBalance;
-    private String SQL_PIN;
+
 
     public String getSQL_IBAN() {
         return SQL_IBAN;
@@ -115,16 +126,7 @@ public class SessionUser{
         return SQL_PIN;
     }
 
-    private static String SQL_loginEmail;
-    private static String SQL_loginUsername;
-    private static String SQL_loginFirstName;
-    private static String SQL_loginLastName;
-    private static String SQL_loginBirthYear;
-    private static String SQL_loginNetIncome;
-    private static String SQL_loginIBAN;
-    private static String SQL_loginCardNumber;
-    private static String SQL_loginAccountBalance;
-    private static String SQL_loginDebtBalance;
+
 
     public static String getSQL_loginEmail() {
         return SQL_loginEmail;

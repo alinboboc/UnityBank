@@ -17,28 +17,34 @@ public class CheckAccountDetails extends DatabaseCredentials {
     }
 
     public void listAccountDetails() throws SQLException {
+        String loggedUserEmail = UserSession.getLoggedUserEmail();
+        if (loggedUserEmail == null) {
+            System.out.println("No user is currently logged in.");
+            new MainPage();
+            return;
+        }
+
         String query = "SELECT * FROM users WHERE SQL_registerEmail = ?";
-        try (Connection conn = getDatabaseConnectionDetails();
-             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-            preparedStatement.setString(1, getSQL_loginEmail());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    System.out.println("Email: " + resultSet.getString("SQL_registerEmail"));
-                    System.out.println("Username: " + resultSet.getString("SQL_registerUsername"));
-                    System.out.println("IBAN: " + resultSet.getString("SQL_IBAN"));
-                    System.out.println("Card number: " + resultSet.getString("SQL_cardNumber"));
-                    System.out.println("Account balance: " + resultSet.getDouble("SQL_accountBalance"));
-                    System.out.println("Account debt: " + resultSet.getDouble("SQL_debtBalance"));
-                    System.out.println("First name: " + resultSet.getString("SQL_registerFirstName"));
-                    System.out.println("Last name: " + resultSet.getString("SQL_registerLastName"));
-                    System.out.println("Birth year: " + resultSet.getInt("SQL_registerBirthYear"));
-                    System.out.println("Net income: " + resultSet.getDouble("SQL_registerNetIncome"));
+        try (Connection connection = getDatabaseConnectionDetails(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, loggedUserEmail);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("Email: " + rs.getString("SQL_registerEmail"));
+                    System.out.println("Username: " + rs.getString("SQL_registerUsername"));
+                    System.out.println("IBAN: " + rs.getString("SQL_IBAN"));
+                    System.out.println("Card number: " + rs.getString("SQL_cardNumber"));
+                    System.out.println("Account balance: " + rs.getDouble("SQL_accountBalance"));
+                    System.out.println("Account debt: " + rs.getDouble("SQL_debtBalance"));
+                    System.out.println("First name: " + rs.getString("SQL_registerFirstName"));
+                    System.out.println("Last name: " + rs.getString("SQL_registerLastName"));
+                    System.out.println("Birth year: " + rs.getInt("SQL_registerBirthYear"));
+                    System.out.println("Net income: " + rs.getDouble("SQL_registerNetIncome"));
                 } else {
                     System.out.println("No user found with the provided email.");
+                    new MainPage();
                 }
             }
         }
-
         promptToGoBack();
     }
 

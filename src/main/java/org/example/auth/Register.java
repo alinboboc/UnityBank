@@ -4,50 +4,37 @@ import org.example.app.LandingPage;
 import org.example.database.DatabaseCredentials;
 
 import java.sql.*;
-import java.util.Scanner;
 
 public class Register extends DatabaseCredentials {
 
-    private final Scanner scanner = new Scanner(System.in);
-
-    public Register() {
+    public Register() throws SQLException {
         System.out.println("You chose to register a new account.");
-        System.out.println("If you want to go back to the main menu, press 0 and ENTER");
         registerProcedure();
     }
 
-    public void registerProcedure() {
-        try (Connection conn = getDatabaseConnectionDetails()) {
-            registerEmail();
-            registerUsername();
-            registerFirstName();
-            registerLastName();
-            registerBirthYear();
-            registerNetIncome();
-            registerPassword();
-            accountCreation();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void registerProcedure() throws SQLException {
+        registerEmail();
     }
 
     public void registerEmail() throws SQLException {
         System.out.println("Enter your email address:");
+        pressToReturn();
         setSQL_registerEmail(scanner.nextLine());
         if (getSQL_registerEmail().equals("0")) {
             new LandingPage();
             return;
         }
-        Connection conn = getDatabaseConnectionDetails();
-        String SQLEmail = "SELECT * FROM users WHERE SQL_registerEmail = ?";
-        try (PreparedStatement preparedStatement = conn.prepareStatement(SQLEmail)) {
+        Connection connection = getDatabaseConnectionDetails();
+        String query = "SELECT * FROM users WHERE SQL_registerEmail = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, getSQL_registerEmail());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
                     System.out.println("The email is already registered, please try with another one or login.");
+                    new LandingPage();
                 } else {
                     if (isEmailValid(getSQL_registerEmail())) {
-                        System.out.println("EMAIL IS OK");
+                        registerUsername();
                     } else {
                         System.out.println("The email you provided is invalid, please try again");
                         registerEmail();
@@ -59,17 +46,21 @@ public class Register extends DatabaseCredentials {
 
     public void registerUsername() throws SQLException {
         System.out.println("Enter your desired username:");
+        pressToReturn();
         setSQL_registerUsername(scanner.nextLine());
-        Connection conn = getDatabaseConnectionDetails();
-        String SQLUsername = "SELECT * FROM users WHERE SQL_registerUsername = ?";
-        try (PreparedStatement preparedStatement = conn.prepareStatement(SQLUsername)) {
+        Connection connection = getDatabaseConnectionDetails();
+        String query = "SELECT * FROM users WHERE SQL_registerUsername = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, getSQL_registerUsername());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
                     System.out.println("The username is already registered, please try with another one.");
+                    registerUsername();
                 } else {
-                    if (isUsernameValid(getSQL_registerUsername())) {
-                        System.out.println("USERNAME IS OK");
+                    if ("0".equals(getSQL_registerUsername())) {
+                        new LandingPage();
+                    } else if (isUsernameValid(getSQL_registerUsername())) {
+                        registerFirstName();
                     } else {
                         System.out.println("The username you provided is invalid, it must contains only letters and numbers.");
                         registerUsername();
@@ -79,58 +70,82 @@ public class Register extends DatabaseCredentials {
         }
     }
 
-    public void registerFirstName() {
+    public void registerFirstName() throws SQLException {
         System.out.println("Enter your first name:");
+        pressToReturn();
         setSQL_registerFirstName(scanner.nextLine());
         if (isNameValid(getSQL_registerFirstName())) {
-            System.out.println("FIRST NAME IS OK");
+            registerLastName();
         } else {
-            System.out.println("The first name you added does not contain only letters. Please try again.");
-            registerFirstName();
+            pressToReturn();
+            if (getSQL_registerFirstName().equals("0")) {
+                new LandingPage();
+            } else {
+                System.out.println("The first name you added does not contain only letters. Please try again.");
+                registerFirstName();
+            }
         }
     }
 
-    public void registerLastName() {
+    public void registerLastName() throws SQLException {
         System.out.println("Enter your last name:");
+        pressToReturn();
         setSQL_registerLastName(scanner.nextLine());
         if (isNameValid(getSQL_registerLastName())) {
-            System.out.println("LAST NAME IS OK");
+            registerBirthYear();
         } else {
-            System.out.println("The LAST name you added does not contain only letters. Please try again.");
-            registerLastName();
+            pressToReturn();
+            if (getSQL_registerLastName().equals("0")) {
+                new LandingPage();
+            } else {
+                System.out.println("The last name must contain only letters. Please try again.");
+                registerLastName();
+            }
         }
     }
 
-    public void registerBirthYear() {
+    public void registerBirthYear() throws SQLException {
         System.out.println("Enter your birth year:");
+        pressToReturn();
         setSQL_registerBirthYear(scanner.nextLine().trim());
         if (isBirthYearValid(getSQL_registerBirthYear())) {
-            System.out.println("AGE IS OK");
+            registerNetIncome();
         } else {
-            System.out.println("The age is not ok");
-            registerBirthYear();
+            pressToReturn();
+            if (getSQL_registerBirthYear().equals("0")) {
+                new LandingPage();
+            } else {
+                System.out.println("The age is not valid, please try again.");
+                registerBirthYear();
+            }
         }
     }
 
-    public void registerNetIncome() {
+    public void registerNetIncome() throws SQLException {
         System.out.println("Enter your net income:");
+        pressToReturn();
         setSQL_registerNetIncome(scanner.nextLine());
         if (isNetIncomeValid(getSQL_registerNetIncome())) {
-            System.out.println("NET INCOME IS OK");
+            registerPassword();
         } else {
-            System.out.println("THE NET INCOME CONTAINS INVALID CHARACTERS");
-            registerNetIncome();
+            pressToReturn();
+            if (getSQL_registerNetIncome().equals("0")) {
+                new LandingPage();
+            } else {
+                System.out.println("The net income contains invalid characters, please try again.");
+                registerNetIncome();
+            }
         }
     }
 
-    public void registerPassword() {
+    public void registerPassword() throws SQLException {
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
         if (isPasswordValid(password)) {
             System.out.println("Confirm your password:");
             setSQL_registerPassword(scanner.nextLine());
             if (password.equals(getSQL_registerPassword())) {
-                System.out.println("Your account has been created");
+                accountCreation();
             } else {
                 System.out.println("The password doesn't match. Try again.");
                 registerPassword();
@@ -141,15 +156,15 @@ public class Register extends DatabaseCredentials {
         }
     }
 
-    public void IBANsetter() throws SQLException {
+    public void IBAN_setter() throws SQLException {
         String IBAN = IBANGenerator();
-        Connection conn = getDatabaseConnectionDetails();
-        String SQLUsername = "SELECT * FROM users WHERE SQL_IBAN = ?";
-        try (PreparedStatement preparedStatement = conn.prepareStatement(SQLUsername)) {
+        Connection connection = getDatabaseConnectionDetails();
+        String query = "SELECT * FROM users WHERE SQL_IBAN = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, IBAN);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    IBANsetter();
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    IBAN_setter();
                 } else {
                     setSQL_IBAN(IBAN);
                 }
@@ -159,12 +174,12 @@ public class Register extends DatabaseCredentials {
 
     public void cardNumberSetter() throws SQLException {
         String cardNumber = String.valueOf(cardNumberGenerator());
-        Connection conn = getDatabaseConnectionDetails();
-        String SQLUsername = "SELECT * FROM users WHERE SQL_cardNumber = ?";
-        try (PreparedStatement preparedStatement = conn.prepareStatement(SQLUsername)) {
+        Connection connection = getDatabaseConnectionDetails();
+        String query = "SELECT * FROM users WHERE SQL_cardNumber = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, getSQL_cardNumber());
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
                     cardNumberSetter();
                 } else {
                     setSQL_cardNumber(cardNumber);
@@ -174,25 +189,26 @@ public class Register extends DatabaseCredentials {
     }
 
     public void accountCreation() throws SQLException {
-        IBANsetter();
+        IBAN_setter();
         cardNumberSetter();
         pinGenerator();
 
         Connection conn = getDatabaseConnectionDetails();
-        String accountDetails = "INSERT INTO users (\n" +
-                " SQL_registerEmail,\n" +
-                " SQL_registerUsername, \n" +
-                " SQL_registerPassword, \n" +
-                " SQL_registerFirstName, \n" +
-                " SQL_registerLastName, \n" +
-                " SQL_registerBirthYear, \n" +
-                " SQL_registerNetIncome, \n" +
-                " SQL_IBAN, \n" +
-                " SQL_cardNumber, \n" +
-                " SQL_PIN, \n" +
-                " SQL_accountBalance, \n" +
-                " SQL_debtBalance)\n" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String accountDetails = """
+                INSERT INTO users (
+                 SQL_registerEmail,
+                 SQL_registerUsername,\s
+                 SQL_registerPassword,\s
+                 SQL_registerFirstName,\s
+                 SQL_registerLastName,\s
+                 SQL_registerBirthYear,\s
+                 SQL_registerNetIncome,\s
+                 SQL_IBAN,\s
+                 SQL_cardNumber,\s
+                 SQL_PIN,\s
+                 SQL_accountBalance,\s
+                 SQL_debtBalance)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""";
 
         try (PreparedStatement preparedStatement = conn.prepareStatement(accountDetails)) {
             preparedStatement.setString(1, getSQL_registerEmail());
@@ -210,13 +226,19 @@ public class Register extends DatabaseCredentials {
 
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("User account created successfully.");
+                System.out.println("Your account has been created.");
+                new LandingPage();
             } else {
                 System.out.println("Failed to create user account.");
+                new LandingPage();
             }
         } catch (SQLException e) {
             System.err.println("Error creating user account: " + e.getMessage());
             throw e;
         }
+    }
+
+    public void pressToReturn() {
+        System.out.println("If you want to go back to the main menu, press 0 and ENTER");
     }
 }

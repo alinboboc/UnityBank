@@ -19,4 +19,5 @@ TODO LIST:
 5. need to recheck all the variables from classes because some of them doesn't have any meaning
 6. need to test if i can use only one result set to update and read data from SQL,
 7. register nu merge
+8. NEED TO SET USER NAME LOCALLY TO UPDATE THE WELCOME MESSAGE.
 */
