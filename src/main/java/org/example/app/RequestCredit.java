@@ -9,7 +9,10 @@ import java.sql.SQLException;
 import java.time.Year;
 import java.util.Scanner;
 
+import static org.example.app.UserSession.getLoggedUserEmail;
+
 public class RequestCredit extends DatabaseCredentials {
+
     private static final int MINIMUM_NET_INCOME = 2500;
     private static final double MAXIMUM_REQUEST_RATE = 0.4;
     private static final int MINIMUM_AGE = 18;
@@ -17,11 +20,15 @@ public class RequestCredit extends DatabaseCredentials {
 
     private final Scanner scanner = new Scanner(System.in);
 
-    public RequestCredit() throws SQLException {
+    public RequestCredit() {
         System.out.println("You chose to request a credit.");
-        System.out.println("We can offer you a credit with 5% interest rate.");
-        System.out.println("If you want to continue press 1 then Enter or if you want to go back, press 0 then Enter.");
-        checkIfEligible();
+        System.out.println("We can offer you a credit with a 5% interest rate.");
+        System.out.println("If you want to continue, press 1 and Enter; if you want to go back, press 0 and Enter.");
+        try {
+            checkIfEligible();
+        } catch (SQLException e) {
+            System.out.println("An error occurred while processing your credit request: " + e.getMessage());
+        }
     }
 
     private void checkIfEligible() throws SQLException {
@@ -37,7 +44,7 @@ public class RequestCredit extends DatabaseCredentials {
         try (Connection conn = getDatabaseConnectionDetails()) {
             String sqlEmailQuery = "SELECT SQL_registerBirthYear, SQL_registerNetIncome FROM users WHERE SQL_registerEmail = ?";
             try (PreparedStatement preparedStatement = conn.prepareStatement(sqlEmailQuery)) {
-                preparedStatement.setString(1, getSQL_loginEmail());
+                preparedStatement.setString(1, getLoggedUserEmail());
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -66,13 +73,26 @@ public class RequestCredit extends DatabaseCredentials {
 
     private void processCreditRequest(int maxCreditRequest) throws SQLException {
         System.out.println("Enter the sum you want to request:");
-        int sumRequest = Integer.parseInt(scanner.nextLine());
+        int sumRequest;
+        try {
+            sumRequest = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            new MainPage();
+            return;
+        }
 
         while (sumRequest > maxCreditRequest) {
             System.out.println("The sum you entered is bigger than the maximum.");
             System.out.println("You can request up to " + maxCreditRequest);
-            System.out.println("If you want to cancel the request, press 0 then Enter.");
-            sumRequest = Integer.parseInt(scanner.nextLine());
+            System.out.println("If you want to cancel the request, press 0 and Enter.");
+            try {
+                sumRequest = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                new MainPage();
+                return;
+            }
 
             if (sumRequest == 0) {
                 new MainPage();
@@ -82,12 +102,25 @@ public class RequestCredit extends DatabaseCredentials {
 
         System.out.println("The sum you requested is " + sumRequest);
         System.out.println("How many months do you want to pay? (max 60)");
-        int months = Integer.parseInt(scanner.nextLine());
+        int months;
+        try {
+            months = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number.");
+            new MainPage();
+            return;
+        }
 
         while (months > MAX_PAYMENT_MONTHS) {
             System.out.println("The period is too long, maximum period is 60 months.");
-            System.out.println("If you want to cancel the request, press 0 then Enter.");
-            months = Integer.parseInt(scanner.nextLine());
+            System.out.println("If you want to cancel the request, press 0 and Enter.");
+            try {
+                months = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                new MainPage();
+                return;
+            }
 
             if (months == 0) {
                 new MainPage();
@@ -97,7 +130,7 @@ public class RequestCredit extends DatabaseCredentials {
 
         double monthlyPayment = (double) sumRequest / months;
         System.out.println("Your monthly payment will be " + monthlyPayment);
-        System.out.println("If you accept the credit conditions, press 1 then Enter, otherwise press 0 then Enter.");
+        System.out.println("If you accept the credit conditions, press 1 and Enter; otherwise, press 0 and Enter.");
         String creditDecision = scanner.nextLine();
 
         if ("0".equals(creditDecision)) {
@@ -107,9 +140,9 @@ public class RequestCredit extends DatabaseCredentials {
 
         if ("1".equals(creditDecision)) {
             try (Connection conn = getDatabaseConnectionDetails()) {
-                String sqlEmailQuery = "SELECT SQL_debtBalance, SQL_accountBalance FROM users WHERE SQL_registerEmail = ?";
-                try (PreparedStatement preparedStatement = conn.prepareStatement(sqlEmailQuery)) {
-                    preparedStatement.setString(1, getSQL_loginEmail());
+                String sqlBalanceQuery = "SELECT SQL_debtBalance, SQL_accountBalance FROM users WHERE SQL_registerEmail = ?";
+                try (PreparedStatement preparedStatement = conn.prepareStatement(sqlBalanceQuery)) {
+                    preparedStatement.setString(1, getLoggedUserEmail());
 
                     try (ResultSet resultSet = preparedStatement.executeQuery()) {
                         if (resultSet.next()) {
@@ -123,7 +156,7 @@ public class RequestCredit extends DatabaseCredentials {
                             try (PreparedStatement updateStmt = conn.prepareStatement(updateBalanceQuery)) {
                                 updateStmt.setInt(1, newDebtBalance);
                                 updateStmt.setInt(2, newAccountBalance);
-                                updateStmt.setString(3, getSQL_loginEmail());
+                                updateStmt.setString(3, getLoggedUserEmail());
                                 updateStmt.executeUpdate();
 
                                 System.out.println("Your credit request has been approved and the balance has been updated.");

@@ -9,7 +9,7 @@ import static org.example.app.UserSession.getLoggedUserEmail;
 public class MainPage extends SessionUser {
 
     public MainPage() throws SQLException {
-        System.out.println("Welcome back, " + getLoggedUserEmail());
+        System.out.println("Welcome back!");
         mainPageNavigation();
     }
 

@@ -40,7 +40,6 @@ public class Login extends DatabaseCredentials {
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         UserSession.setLoggedUserEmail(userEmailInput);
-
                         handlePassword(rs);
                     } else {
                         System.out.println("Email not found. Please try again.");
